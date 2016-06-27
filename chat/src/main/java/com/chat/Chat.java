@@ -50,7 +50,7 @@ public class Chat implements MessageListener{
 		//创建jms发布者和消费者
 		publisher = pubSession.createPublisher(chatTopic);
 		//创建消费者 附加的参数一个是消息选择器(null),noLocal标记为true表示发布者不能自己消费 为本地测试方便 采用false
-		TopicSubscriber subscriber = subSession.createSubscriber(chatTopic, null, false);
+		TopicSubscriber subscriber = subSession.createSubscriber(chatTopic, null, true);
 		subscriber.setMessageListener(this);//消费者的消息监听器
 		
 		this.username = username;
@@ -90,9 +90,16 @@ public class Chat implements MessageListener{
 	}
 	
 	public static void main(String[] args) throws NamingException, JMSException, IOException {
-		String username = "zhangsan";
+		if(args.length != 3){
+			System.out.println("参数不正确,factory,topic,username不能为空！");
+			return;
+		}
+	/*	String username = "zhangsan";
 		String topicFactory = "TopicFac";
-		String topicName = "topic";
+		String topicName = "topic";*/
+		String topicFactory = args[0];
+		String topicName = args[1];
+		String username = args[2];
 		Chat chat = new Chat(topicFactory, topicName, username);//创建聊天
 		BufferedReader commandLine = new BufferedReader(new InputStreamReader(System.in));
 		while(true){
