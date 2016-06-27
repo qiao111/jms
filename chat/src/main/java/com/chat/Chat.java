@@ -51,7 +51,7 @@ public class Chat implements MessageListener{
 		publisher = pubSession.createPublisher(chatTopic);
 		//创建消费者 附加的参数一个是消息选择器(null),noLocal标记为true表示发布者不能自己消费 为本地测试方便 采用false
 		TopicSubscriber subscriber = subSession.createSubscriber(chatTopic, null, true);
-		subscriber.setMessageListener(this);//消费者的消息监听器
+		subscriber.setMessageListener(this);// 订阅者监听此聊天室
 		
 		this.username = username;
 		//启动jms链接，允许传送消息
