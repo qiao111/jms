@@ -4,4 +4,4 @@
 
 	下载地址：http://repository.jboss.org/maven2/javax/jms/jms/1.1/
 	
-	安装到本地仓库：mvn install:install-file -DgroupId=javax.jms -DartifactId=jms-Dversion=1.1 -Dpackaging=jar -Dfile=E:\jms-1.1.jar
+	安装到本地仓库：mvn install:install-file -DgroupId=javax.jms -DartifactId=jms -Dversion=1.1 -Dpackaging=jar -Dfile=E:\jms-1.1.jar
