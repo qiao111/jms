@@ -12,6 +12,7 @@
   <modules>
   	<module>chat</module>
     <module>p2p</module>
+    <module>pubsub</module>
   </modules>
 	
   <properties>
