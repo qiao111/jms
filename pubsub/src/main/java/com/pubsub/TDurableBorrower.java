@@ -19,11 +19,11 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 /**
- * 订阅者 订阅主题消息 
+ * 订阅者 订阅主题消息  持久型订阅者
  * @author qiaolin
  *
  */
-public class TBorrower implements MessageListener{
+public class TDurableBorrower implements MessageListener{
 
 	private TopicConnection topicConnection;
 	
@@ -33,7 +33,9 @@ public class TBorrower implements MessageListener{
 	
 	private double currentRate;
 	
-	public TBorrower(String topicFactory,String topicName,double rate){
+	private TopicSubscriber subscriber;
+	
+	public TDurableBorrower(String topicFactory,String topicName,double rate){
 		try {
 			//连接MQ提供者
 			Context context = new InitialContext();
@@ -41,6 +43,8 @@ public class TBorrower implements MessageListener{
 			TopicConnectionFactory topicConnectionFactory = (TopicConnectionFactory)context.lookup(topicFactory);
 			//创建连接
 			topicConnection = topicConnectionFactory.createTopicConnection();
+			//设置客户端ID 以供后续创建持久型订阅者
+			topicConnection.setClientID("durable");
 			//创建JMS会话
 			topicSession = topicConnection.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
 			//获取主题
@@ -49,8 +53,8 @@ public class TBorrower implements MessageListener{
 			this.currentRate = rate;
 			//启动连接
 			topicConnection.start();
-			//创建订阅者 非持久订阅者 
-			TopicSubscriber subscriber = topicSession.createSubscriber(topic);
+			//创建持久型订阅者
+			subscriber = topicSession.createDurableSubscriber(topic, "durableSubscriber");
 			subscriber.setMessageListener(this);//消息监听器
 		} catch (NamingException e) {
 			e.printStackTrace();
@@ -83,6 +87,9 @@ public class TBorrower implements MessageListener{
 	 */
 	private void exit(){
 		try {
+			subscriber.close();
+			//取消订阅状态  对持久型订阅者来说 
+			topicSession.unsubscribe("durableSubscriber");
 			topicConnection.close();
 		} catch (JMSException e) {
 			e.printStackTrace();
@@ -97,7 +104,7 @@ public class TBorrower implements MessageListener{
 		}
 		String topicFactory = args[0],topicName = args[1];
 		double rate = Double.valueOf(args[2]);
-		TBorrower borrower = new TBorrower(topicFactory, topicName, rate);
+		TDurableBorrower borrower = new TDurableBorrower(topicFactory, topicName, rate);
 		try{
 			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 			reader.readLine();
