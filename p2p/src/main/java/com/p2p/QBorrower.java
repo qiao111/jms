@@ -74,10 +74,11 @@ public class QBorrower {
 			System.out.println("发送消息");
 			//设置过滤器 获取当前的消息 此处的过滤器一定要写正确 否则无法接受到响应信息
 			String filter = "JMSCorrelationID='" + message.getJMSMessageID() + "'";
-			System.out.println(filter);
 			System.out.println(responseQ.getQueueName());
 			//创建接收者  等待响应队列的响应信息
 			QueueReceiver receiver = qSession.createReceiver(responseQ,filter);
+			//输出消息选择器
+			System.out.println(receiver.getMessageSelector());
 			//接受响应消息 此处表示不设置过期时间 如果需要设置则receiver.receive(3000) 以毫秒为单位
 			TextMessage textMessage = (TextMessage) receiver.receive();
 			if(textMessage == null){

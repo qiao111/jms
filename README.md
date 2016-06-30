@@ -5,3 +5,5 @@
 	下载地址：http://repository.jboss.org/maven2/javax/jms/jms/1.1/
 	
 	安装到本地仓库：mvn install:install-file -DgroupId=javax.jms -DartifactId=jms -Dversion=1.1 -Dpackaging=jar -Dfile=E:\jms-1.1.jar
+	
+3、JMS是一种规范。因此，在本项目中可以不引入jms的jar包，也无需安装。本例中使用的是ActiveMQ。
