@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jms="http://www.springframework.org/schema/jms"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+     http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+     http://www.springframework.org/schema/context
+     http://www.springframework.org/schema/context/spring-context-4.1.xsd
+    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+	http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms-4.1.xsd">
+	<!-- 配置属性文件 -->
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<value>classpath:jndi.properties</value>
+		</property>
+	</bean>
+	<!-- jndiTemplate 指定连接JMS提供者所必需的初始上下文工厂、提供者URL、安全凭证 -->
+	<bean id="jndiTemplate" class="org.springframework.jndi.JndiTemplate">
+		<property name="environment">
+			<props>
+				<prop key="java.naming.factory.initial">${java.naming.factory.initial}</prop>
+				<prop key="java.naming.provider.url">${java.naming.provider.url}</prop>
+				<prop key="java.naming.security.principal">${java.naming.security.principal}</prop>
+				<prop key="java.naming.security.credentials">${java.naming.security.credentials}</prop>
+			</props>
+		</property>
+	</bean>
+	<!-- 定义连接工厂 -->
+	<bean id="jndiQueueConnectionFactory" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiTemplate"  ref="jndiTemplate"/>
+		<property name="jndiName" value="${connectionFactoryNames}"/>
+	</bean>
+		<!-- 配置destination -->
+	<bean id="queueDestination" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiTemplate"  ref="jndiTemplate"/>
+		<property name="jndiName" value="not_default"/>
+	</bean>
+	
+	<bean id="queueConnectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
+		<property name="targetConnectionFactory" ref="jndiQueueConnectionFactory"/>
+		<!-- 设置高速缓存容量 -->
+		<property name="sessionCacheSize" value="1"/>
+	</bean>
+
+	<!-- 创建destinationResolver -->
+	<bean id="destinationResolver" class="org.springframework.jms.support.destination.JndiDestinationResolver">
+		<property name="jndiTemplate"  ref="jndiTemplate"/>
+		<property name="cache" value="true"/><!-- 使用Cahce -->
+		<!-- 不创建动态队列 -->
+		<property name="fallbackToDynamicDestination" value="false"/>
+	</bean>
+	<!-- 创建JmsTemplate -->
+	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+		<property name="connectionFactory" ref="queueConnectionFactory"/>
+		<property name="destinationResolver" ref="destinationResolver"/>
+		<!-- 默认队列名称 -->
+		<property name="defaultDestinationName" value="${defaultDestinationName}"/>
+		<!-- false for  PointToPoint true for PubSub -->
+		<property name="pubSubDomain" value="false"/>
+		<!-- 接收者等待30000毫秒后 不在继续等待 -->
+		<property name="receiveTimeout" value="30000"/>
+	</bean>
+</beans>
